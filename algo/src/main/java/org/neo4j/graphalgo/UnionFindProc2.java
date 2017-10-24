@@ -15,6 +15,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDisjointSetStruct;
 import org.neo4j.graphalgo.core.write.DisjointSetStructTranslator;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.HugeDisjointSetStructTranslator;
+import org.neo4j.graphalgo.impl.DSSResult;
 import org.neo4j.graphalgo.impl.GraphUnionFind;
 import org.neo4j.graphalgo.impl.HugeGraphUnionFind;
 import org.neo4j.graphalgo.impl.HugeParallelUnionFindQueue;
@@ -69,45 +70,18 @@ public class UnionFindProc2 {
             graph = load(configuration, tracker);
         }
 
-        if (graph instanceof HugeGraph) {
-            HugeGraph hugeGraph = (HugeGraph) graph;
+        // evaluation
+        DSSResult dssResult = evaluate(graph, configuration, tracker);
 
-            // evaluation
-            final HugeDisjointSetStruct struct;
-            try (ProgressTimer timer = builder.timeEval()) {
-                struct = evaluate(hugeGraph, configuration, tracker);
-            }
-
-            if (configuration.isWriteFlag()) {
-                // write back
-                builder.timeWrite(() ->
-                        write(hugeGraph, struct, configuration));
-            }
-
-            return Stream.of(builder
-                .withNodeCount(graph.nodeCount())
-                .withSetCount(struct.getSetCount())
-                .build());
-
-        } else {
-
-            // evaluation
-            final DisjointSetStruct struct;
-            try (ProgressTimer timer = builder.timeEval()) {
-                struct = evaluate(graph, configuration);
-            }
-
-            if (configuration.isWriteFlag()) {
-                // write back
-                builder.timeWrite(() ->
-                        write(graph, struct, configuration));
-            }
-
-            return Stream.of(builder
-                .withNodeCount(graph.nodeCount())
-                .withSetCount(struct.getSetCount())
-                .build());
+        if (configuration.isWriteFlag()) {
+            // write back
+            builder.timeWrite(() -> write(graph, dssResult, configuration));
         }
+
+        return Stream.of(builder
+                .withNodeCount(graph.nodeCount())
+                .withSetCount(dssResult.getSetCount())
+                .build());
     }
 
     @Procedure(value = "algo.unionFind.exp1.stream")
@@ -123,11 +97,13 @@ public class UnionFindProc2 {
                 .overrideNodeLabelOrQuery(label)
                 .overrideRelationshipTypeOrQuery(relationship);
 
+        AllocationTracker tracker = AllocationTracker.create();
+
         // loading
-        final Graph graph = load(configuration);
+        final Graph graph = load(configuration, tracker);
 
         // evaluation
-        return evaluate(graph, configuration)
+        return evaluate(graph, configuration, tracker)
                 .resultStream(graph);
     }
 
@@ -142,6 +118,19 @@ public class UnionFindProc2 {
                 .withDirection(Direction.OUTGOING)
                 .withAllocationTracker(tracker)
                 .load(config.getGraphImpl());
+    }
+
+    private DSSResult evaluate(Graph graph, ProcedureConfiguration config, final AllocationTracker tracker) {
+        if (graph instanceof HugeGraph) {
+            HugeGraph hugeGraph = (HugeGraph) graph;
+            HugeDisjointSetStruct dss = evaluate(
+                    hugeGraph,
+                    config,
+                    tracker);
+            return new DSSResult(dss);
+        }
+        DisjointSetStruct dss = evaluate(graph, config);
+        return new DSSResult(dss);
     }
 
     private DisjointSetStruct evaluate(Graph graph, ProcedureConfiguration config) {
@@ -236,29 +225,33 @@ public class UnionFindProc2 {
         return struct;
     }
 
-    private void write(Graph graph, DisjointSetStruct struct, ProcedureConfiguration configuration) {
+    private void write(Graph graph, DSSResult struct, ProcedureConfiguration configuration) {
         log.debug("Writing results");
-        Exporter.of(api, graph)
+        Exporter exporter = Exporter.of(api, graph)
                 .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getConcurrency(), TerminationFlag.wrap(transaction))
-                .build()
-                .write(
-                        configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),
-                        struct,
-                        DisjointSetStructTranslator.INSTANCE
-                );
+                .parallel(
+                        Pools.DEFAULT,
+                        configuration.getConcurrency(),
+                        TerminationFlag.wrap(transaction))
+                .build();
+        if (struct.hugeStruct != null) {
+            write(exporter, struct.hugeStruct, configuration);
+        } else {
+            write(exporter, struct.struct, configuration);
+        }
     }
 
-    private void write(HugeGraph graph, HugeDisjointSetStruct struct, ProcedureConfiguration configuration) {
-        log.debug("Writing results");
-        Exporter.of(api, graph)
-                .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getConcurrency(), TerminationFlag.wrap(transaction))
-                .build()
-                .write(
-                        configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),
-                        struct,
-                        HugeDisjointSetStructTranslator.INSTANCE
-                );
+    private void write(Exporter exporter, DisjointSetStruct struct, ProcedureConfiguration configuration) {
+        exporter.write(
+                configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),
+                struct,
+                DisjointSetStructTranslator.INSTANCE);
+    }
+
+    private void write(Exporter exporter, HugeDisjointSetStruct struct, ProcedureConfiguration configuration) {
+        exporter.write(
+                configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),
+                struct,
+                HugeDisjointSetStructTranslator.INSTANCE);
     }
 }
