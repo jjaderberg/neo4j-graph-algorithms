@@ -1,31 +1,22 @@
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDisjointSetStruct;
-import org.neo4j.graphalgo.core.write.DisjointSetStructTranslator;
-import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.core.write.HugeDisjointSetStructTranslator;
-import org.neo4j.graphalgo.impl.DSSResult;
 import org.neo4j.graphalgo.impl.GraphUnionFind;
 import org.neo4j.graphalgo.impl.HugeGraphUnionFind;
 import org.neo4j.graphalgo.impl.HugeParallelUnionFindQueue;
 import org.neo4j.graphalgo.impl.ParallelUnionFindQueue;
+import org.neo4j.graphalgo.impl.UnionFindProcExec;
 import org.neo4j.graphalgo.results.UnionFindResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -34,10 +25,6 @@ import java.util.stream.Stream;
  * @author mknblch
  */
 public class UnionFindProc2 {
-
-    public static final String CONFIG_THRESHOLD = "threshold";
-    public static final String CONFIG_CLUSTER_PROPERTY = "partitionProperty";
-    public static final String DEFAULT_CLUSTER_PROPERTY = "partition";
 
     @Context
     public GraphDatabaseAPI api;
@@ -57,31 +44,7 @@ public class UnionFindProc2 {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
-
-        AllocationTracker tracker = AllocationTracker.create();
-        UnionFindResult.Builder builder = UnionFindResult.builder();
-
-        // loading
-        final Graph graph;
-        try (ProgressTimer timer = builder.timeLoad()) {
-            graph = load(configuration, tracker);
-        }
-
-        // evaluation
-        DSSResult dssResult = evaluate(graph, configuration, tracker);
-
-        if (configuration.isWriteFlag()) {
-            // write back
-            builder.timeWrite(() -> write(graph, dssResult, configuration));
-        }
-
-        return Stream.of(builder
-                .withNodeCount(graph.nodeCount())
-                .withSetCount(dssResult.getSetCount())
-                .build());
+        return UnionFindProcExec.run(config, label, relationship, this::ufExec);
     }
 
     @Procedure(value = "algo.unionFind.exp1.stream")
@@ -93,165 +56,36 @@ public class UnionFindProc2 {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
-
-        AllocationTracker tracker = AllocationTracker.create();
-
-        // loading
-        final Graph graph = load(configuration, tracker);
-
-        // evaluation
-        return evaluate(graph, configuration, tracker)
-                .resultStream(graph);
+        return UnionFindProcExec.stream(
+                config,
+                label,
+                relationship,
+                this::ufExec);
     }
 
-    private Graph load(ProcedureConfiguration config, AllocationTracker tracker) {
-        return new GraphLoader(api, Pools.DEFAULT)
-                .withLog(log)
-                .withOptionalLabel(config.getNodeLabelOrQuery())
-                .withOptionalRelationshipType(config.getRelationshipOrQuery())
-                .withOptionalRelationshipWeightsFromProperty(
-                        config.getProperty(),
-                        config.getPropertyDefaultValue(1.0))
-                .withDirection(Direction.OUTGOING)
-                .withAllocationTracker(tracker)
-                .load(config.getGraphImpl());
-    }
-
-    private DSSResult evaluate(Graph graph, ProcedureConfiguration config, final AllocationTracker tracker) {
-        if (graph instanceof HugeGraph) {
-            HugeGraph hugeGraph = (HugeGraph) graph;
-            HugeDisjointSetStruct dss = evaluate(
-                    hugeGraph,
-                    config,
-                    tracker);
-            return new DSSResult(dss);
-        }
-        DisjointSetStruct dss = evaluate(graph, config);
-        return new DSSResult(dss);
-    }
-
-    private DisjointSetStruct evaluate(Graph graph, ProcedureConfiguration config) {
-
-        final DisjointSetStruct struct;
-
-        if (config.getBatchSize(-1) != -1) {
-            final ParallelUnionFindQueue parallelUnionFindQueue = new ParallelUnionFindQueue(graph, Pools.DEFAULT, config.getBatchSize(), config.getConcurrency());
-            if (config.containsKeys(ProcedureConstants.PROPERTY_PARAM, CONFIG_THRESHOLD)) {
-                final Double threshold = config.get(CONFIG_THRESHOLD, 0.0);
-                log.debug("Computing union find with threshold in parallel" + threshold);
-                struct = parallelUnionFindQueue
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(ParallelUnionFindQueue)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute(threshold)
-                        .getStruct();
-            } else {
-                log.debug("Computing union find without threshold in parallel");
-                struct = parallelUnionFindQueue
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(ParallelUnionFindQueue)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute()
-                        .getStruct();
-            }
-            parallelUnionFindQueue.release();
+    private UnionFindProcExec ufExec(final ProcedureConfiguration configuration) {
+        UnionFindProcExec uf;
+        int concurrency = configuration.getConcurrency();
+        if (concurrency > 1) {
+            int minBatchSize = configuration.getBatchSize();
+            uf = UnionFindProcExec.of(
+                    api,
+                    log,
+                    transaction,
+                    "CC(ParallelUnionFindQueue)",
+                    ParallelUnionFindQueue.of(Pools.DEFAULT, minBatchSize, concurrency),
+                    HugeParallelUnionFindQueue.of(Pools.DEFAULT, minBatchSize, concurrency)
+            );
         } else {
-            final GraphUnionFind graphUnionFind = new GraphUnionFind(graph);
-            if (config.containsKeys(ProcedureConstants.PROPERTY_PARAM, CONFIG_THRESHOLD)) {
-                final Double threshold = config.get(CONFIG_THRESHOLD, 0.0);
-                log.debug("Computing union find with threshold " + threshold);
-                struct = graphUnionFind
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(SequentialUnionFind)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute(threshold);
-            } else {
-                log.debug("Computing union find without threshold");
-                struct = graphUnionFind
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(SequentialUnionFind)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute();
-            }
-            graphUnionFind.release();
-            graph.release();
+            uf = UnionFindProcExec.of(
+                    api,
+                    log,
+                    transaction,
+                    "CC(SequentialUnionFind)",
+                    GraphUnionFind::new,
+                    HugeGraphUnionFind::new
+            );
         }
-
-        return struct;
-    }
-
-    private HugeDisjointSetStruct evaluate(HugeGraph graph, ProcedureConfiguration config, AllocationTracker tracker) {
-
-        final HugeDisjointSetStruct struct;
-
-        if (config.getBatchSize(-1) != -1) {
-            final HugeParallelUnionFindQueue parallelUnionFindQueue = new HugeParallelUnionFindQueue(graph, Pools.DEFAULT, config.getBatchSize(), config.getConcurrency(), tracker);
-            if (config.containsKeys(ProcedureConstants.PROPERTY_PARAM, CONFIG_THRESHOLD)) {
-                final Double threshold = config.get(CONFIG_THRESHOLD, 0.0);
-                log.debug("Computing union find with threshold in parallel" + threshold);
-                struct = parallelUnionFindQueue
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(ParallelUnionFindQueue)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute(threshold)
-                        .getStruct();
-            } else {
-                log.debug("Computing union find without threshold in parallel");
-                struct = parallelUnionFindQueue
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(ParallelUnionFindQueue)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute()
-                        .getStruct();
-            }
-            parallelUnionFindQueue.release();
-        } else {
-            final HugeGraphUnionFind graphUnionFind = new HugeGraphUnionFind(graph, tracker);
-            if (config.containsKeys(ProcedureConstants.PROPERTY_PARAM, CONFIG_THRESHOLD)) {
-                final Double threshold = config.get(CONFIG_THRESHOLD, 0.0);
-                log.debug("Computing union find with threshold " + threshold);
-                struct = graphUnionFind
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(SequentialUnionFind)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute(threshold);
-            } else {
-                log.debug("Computing union find without threshold");
-                struct = graphUnionFind
-                        .withProgressLogger(ProgressLogger.wrap(log, "CC(SequentialUnionFind)"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction))
-                        .compute();
-            }
-            graphUnionFind.release();
-            graph.release();
-        }
-
-        return struct;
-    }
-
-    private void write(Graph graph, DSSResult struct, ProcedureConfiguration configuration) {
-        log.debug("Writing results");
-        Exporter exporter = Exporter.of(api, graph)
-                .withLog(log)
-                .parallel(
-                        Pools.DEFAULT,
-                        configuration.getConcurrency(),
-                        TerminationFlag.wrap(transaction))
-                .build();
-        if (struct.hugeStruct != null) {
-            write(exporter, struct.hugeStruct, configuration);
-        } else {
-            write(exporter, struct.struct, configuration);
-        }
-    }
-
-    private void write(Exporter exporter, DisjointSetStruct struct, ProcedureConfiguration configuration) {
-        exporter.write(
-                configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),
-                struct,
-                DisjointSetStructTranslator.INSTANCE);
-    }
-
-    private void write(Exporter exporter, HugeDisjointSetStruct struct, ProcedureConfiguration configuration) {
-        exporter.write(
-                configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),
-                struct,
-                HugeDisjointSetStructTranslator.INSTANCE);
+        return uf;
     }
 }

@@ -26,6 +26,11 @@ public final class HugeDisjointSetStruct {
         return this;
     }
 
+    public static long estimateSize(long capacity) {
+        return LongArray.estimateMemoryUsage(capacity) * 2
+                + MemoryUsage.shallowSizeOfInstance(HugeDisjointSetStruct.class);
+    }
+
     public boolean connected(long p, long q) {
         return find(p) == find(q);
     }

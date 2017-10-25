@@ -12,6 +12,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.BiFunction;
 
 /**
  * parallel UnionFind using ExecutorService only.
@@ -26,15 +27,23 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @author mknblch
  */
-public class HugeParallelUnionFindQueue extends Algorithm<HugeParallelUnionFindQueue> {
+public class HugeParallelUnionFindQueue extends GraphUnionFindAlgo<HugeGraph, HugeDisjointSetStruct, HugeParallelUnionFindQueue> {
 
-    private HugeGraph graph;
     private final ExecutorService executor;
     private final long nodeCount;
     private final long batchSize;
     private final AllocationTracker tracker;
     private final BlockingQueue<HugeDisjointSetStruct> queue;
     private final List<Future<?>> futures;
+
+    public static BiFunction<HugeGraph, AllocationTracker, HugeParallelUnionFindQueue> of(ExecutorService executor, int minBatchSize, int concurrency) {
+        return (graph, tracker) -> new HugeParallelUnionFindQueue(
+                graph,
+                executor,
+                minBatchSize,
+                concurrency,
+                tracker);
+    }
 
     /**
      * initialize parallel UF
@@ -45,7 +54,7 @@ public class HugeParallelUnionFindQueue extends Algorithm<HugeParallelUnionFindQ
             int minBatchSize,
             int concurrency,
             AllocationTracker tracker) {
-        this.graph = graph;
+        super(graph);
         this.executor = executor;
         nodeCount = graph.nodeCount();
         this.tracker = tracker;
@@ -68,7 +77,8 @@ public class HugeParallelUnionFindQueue extends Algorithm<HugeParallelUnionFindQ
         futures = new ArrayList<>();
     }
 
-    public HugeParallelUnionFindQueue compute() {
+    @Override
+    public HugeDisjointSetStruct compute() {
         final int steps = (int) (Math.floorDiv(nodeCount, batchSize) - 1);
         for (long i = 0L; i < nodeCount; i += batchSize) {
             futures.add(executor.submit(new HugeUnionFindTask(i)));
@@ -89,18 +99,18 @@ public class HugeParallelUnionFindQueue extends Algorithm<HugeParallelUnionFindQ
 
         await();
 
-        return this;
+        return getStruct();
+    }
+
+    public HugeDisjointSetStruct compute(double threshold) {
+        throw new IllegalArgumentException("Not yet implemented");
     }
 
     private void await() {
         ParallelUtil.awaitTermination(futures);
     }
 
-    public HugeParallelUnionFindQueue compute(double threshold) {
-        throw new IllegalArgumentException("Not yet implemented");
-    }
-
-    public HugeDisjointSetStruct getStruct() {
+    private HugeDisjointSetStruct getStruct() {
         try {
             return queue.take();
         } catch (InterruptedException e) {
@@ -109,23 +119,12 @@ public class HugeParallelUnionFindQueue extends Algorithm<HugeParallelUnionFindQ
         return null;
     }
 
-    @Override
-    public HugeParallelUnionFindQueue me() {
-        return this;
-    }
-
-    @Override
-    public HugeParallelUnionFindQueue release() {
-        graph = null;
-        return null;
-    }
-
     private class HugeUnionFindTask implements Runnable {
 
         protected final long offset;
         protected final long end;
 
-        public HugeUnionFindTask(long offset) {
+        HugeUnionFindTask(long offset) {
             this.offset = offset;
             this.end = Math.min(offset + batchSize, nodeCount);
         }

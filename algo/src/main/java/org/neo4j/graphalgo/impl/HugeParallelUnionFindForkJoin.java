@@ -1,13 +1,14 @@
 package org.neo4j.graphalgo.impl;
 
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * parallel UnionFind using common ForkJoin-Pool only.
@@ -24,14 +25,18 @@ import java.util.function.Function;
  *
  * @author mknblch
  */
-public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, DisjointSetStruct, ParallelUnionFindForkJoin> {
+public class HugeParallelUnionFindForkJoin extends GraphUnionFindAlgo<HugeGraph, HugeDisjointSetStruct, HugeParallelUnionFindForkJoin> {
 
-    private final int nodeCount;
-    private final int batchSize;
+    private final AllocationTracker tracker;
+    private final long nodeCount;
+    private final long batchSize;
 
-    public static Function<Graph, ParallelUnionFindForkJoin> of(int minBatchSize, int concurrency) {
-        return graph -> new ParallelUnionFindForkJoin(
+    public static BiFunction<HugeGraph, AllocationTracker, HugeParallelUnionFindForkJoin> of(
+            int minBatchSize,
+            int concurrency) {
+        return (graph, tracker) -> new HugeParallelUnionFindForkJoin(
                 graph,
+                tracker,
                 minBatchSize,
                 concurrency);
     }
@@ -41,12 +46,14 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, Disjoin
      *
      * @param graph
      */
-    public ParallelUnionFindForkJoin(
-            Graph graph,
+    private HugeParallelUnionFindForkJoin(
+            HugeGraph graph,
+            AllocationTracker tracker,
             int minBatchSize,
             int concurrency) {
         super(graph);
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        nodeCount = graph.nodeCount();
+        this.tracker = tracker;
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -54,29 +61,29 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, Disjoin
 
     }
 
-    public DisjointSetStruct compute() {
+    public HugeDisjointSetStruct compute() {
         return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
     }
 
 
-    public DisjointSetStruct compute(double threshold) {
+    public HugeDisjointSetStruct compute(double threshold) {
         return ForkJoinPool
                 .commonPool()
                 .invoke(new ThresholdUFTask(0, threshold));
     }
 
-    private class UnionFindTask extends RecursiveTask<DisjointSetStruct> {
+    private class UnionFindTask extends RecursiveTask<HugeDisjointSetStruct> {
 
-        protected final int offset;
-        protected final int end;
+        protected final long offset;
+        protected final long end;
 
-        UnionFindTask(int offset) {
+        UnionFindTask(long offset) {
             this.offset = offset;
             this.end = Math.min(offset + batchSize, nodeCount);
         }
 
         @Override
-        protected DisjointSetStruct compute() {
+        protected HugeDisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
                 final UnionFindTask process = new UnionFindTask(end);
                 process.fork();
@@ -85,13 +92,15 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, Disjoin
             return run();
         }
 
-        protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = new DisjointSetStruct(nodeCount).reset();
-            for (int node = offset; node < end && running(); node++) {
+        protected HugeDisjointSetStruct run() {
+            final HugeDisjointSetStruct struct = new HugeDisjointSetStruct(
+                    nodeCount,
+                    tracker).reset();
+            for (long node = offset; node < end && running(); node++) {
                 graph.forEachRelationship(
                         node,
                         Direction.OUTGOING,
-                        (sourceNodeId, targetNodeId, relationId) -> {
+                        (sourceNodeId, targetNodeId) -> {
                             if (!struct.connected(sourceNodeId, targetNodeId)) {
                                 struct.union(sourceNodeId, targetNodeId);
                             }
@@ -108,23 +117,25 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, Disjoin
 
         private final double threshold;
 
-        ThresholdUFTask(int offset, double threshold) {
+        ThresholdUFTask(long offset, double threshold) {
             super(offset);
             this.threshold = threshold;
         }
 
-        protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = new DisjointSetStruct(nodeCount).reset();
-            for (int node = offset; node < end && running(); node++) {
+        protected HugeDisjointSetStruct run() {
+            final HugeDisjointSetStruct struct = new HugeDisjointSetStruct(
+                    nodeCount,
+                    tracker).reset();
+            for (long node = offset; node < end && running(); node++) {
                 graph.forEachRelationship(
                         node,
                         Direction.OUTGOING,
-                        (sourceNodeId, targetNodeId, relationId, weight) -> {
-                            if (weight < threshold) {
-                                return true;
-                            }
-                            if (!struct.connected(sourceNodeId, targetNodeId)) {
-                                struct.union(sourceNodeId, targetNodeId);
+                        (source, target) -> {
+                            double weight = graph.weightOf(source, target);
+                            if (weight >= threshold && !struct.connected(
+                                    source,
+                                    target)) {
+                                struct.union(source, target);
                             }
                             return true;
                         });

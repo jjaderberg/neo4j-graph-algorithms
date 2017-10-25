@@ -1,6 +1,7 @@
 package org.neo4j.graphalgo.impl;
 
 import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -22,19 +23,23 @@ import org.neo4j.graphdb.Direction;
  *
  * @author mknblch
  */
-public class HugeGraphUnionFind extends Algorithm<HugeGraphUnionFind> {
-
-    private HugeGraph graph;
+public class HugeGraphUnionFind extends GraphUnionFindAlgo<HugeGraph, HugeDisjointSetStruct, HugeGraphUnionFind> {
 
     private HugeDisjointSetStruct dss;
     private final long nodeCount;
+    private HugeRelationshipConsumer unrestricted;
 
     public HugeGraphUnionFind(
             HugeGraph graph,
             AllocationTracker tracker) {
+        super(graph);
         this.graph = graph;
         nodeCount = graph.nodeCount();
         this.dss = new HugeDisjointSetStruct(nodeCount, tracker);
+        unrestricted = (source, target) -> {
+            dss.union(source, target);
+            return true;
+        };
     }
 
     /**
@@ -42,21 +47,9 @@ public class HugeGraphUnionFind extends Algorithm<HugeGraphUnionFind> {
      *
      * @return a DSS
      */
+    @Override
     public HugeDisjointSetStruct compute() {
-        dss.reset();
-        final ProgressLogger progressLogger = getProgressLogger();
-        graph.forEachNode((long node) -> {
-            if (!running()) {
-                return false;
-            }
-            graph.forEachRelationship(node, Direction.OUTGOING, (source, target) -> {
-                dss.union(source, target);
-                return true;
-            });
-            progressLogger.logProgress((double) node / (nodeCount - 1));
-            return true;
-        });
-        return dss;
+        return compute(unrestricted);
     }
 
     /**
@@ -65,35 +58,48 @@ public class HugeGraphUnionFind extends Algorithm<HugeGraphUnionFind> {
      * @param threshold the minimum threshold
      * @return a DSS
      */
+    @Override
     public HugeDisjointSetStruct compute(final double threshold) {
+        return compute(new WithThreshold(threshold));
+    }
+
+    @Override
+    public HugeGraphUnionFind release() {
+        dss = null;
+        unrestricted = null;
+        return super.release();
+    }
+
+    private HugeDisjointSetStruct compute(HugeRelationshipConsumer consumer) {
         dss.reset();
         final ProgressLogger progressLogger = getProgressLogger();
         graph.forEachNode((long node) -> {
             if (!running()) {
                 return false;
             }
-            graph.forEachRelationship(node, Direction.OUTGOING, (source, target) -> {
-                double weight = graph.weightOf(source, target);
-                if (weight >= threshold) {
-                    dss.union(source, target);
-                }
-                return true;
-            });
+            graph.forEachRelationship(node, Direction.OUTGOING, consumer);
             progressLogger.logProgress((double) node / (nodeCount - 1));
             return true;
         });
         return dss;
     }
 
-    @Override
-    public HugeGraphUnionFind me() {
-        return this;
-    }
+    private final class WithThreshold implements HugeRelationshipConsumer {
+        private final double threshold;
 
-    @Override
-    public HugeGraphUnionFind release() {
-        graph = null;
-        dss = null;
-        return this;
+        private WithThreshold(final double threshold) {
+            this.threshold = threshold;
+        }
+
+        @Override
+        public boolean accept(
+                final long source,
+                final long target) {
+            double weight = graph.weightOf(source, target);
+            if (weight >= threshold) {
+                dss.union(source, target);
+            }
+            return true;
+        }
     }
 }
