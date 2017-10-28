@@ -43,7 +43,7 @@ As the distance between nodes in disconnected components of a network is infinit
 
 == Algorithm explanation on simple sample graph
 
-image::{img}/closeness_centrality.png[]
+image::closeness_centrality.png[]
 
 .Create sample graph
 [source,cypher]

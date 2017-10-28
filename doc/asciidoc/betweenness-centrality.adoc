@@ -20,7 +20,7 @@ It applies to a wide range of problems in network theory, including problems rel
 
 == When to use it / use-cases
 
-image::{img}/betweenness_centrality.png[]
+image::betweenness_centrality.png[]
 
 
 _Betweenness centrality_ is useful in finding vertices that serve as a bridge from one part of a graph to

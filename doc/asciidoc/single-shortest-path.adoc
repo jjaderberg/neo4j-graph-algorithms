@@ -37,7 +37,7 @@ If that is not the case (we have negative weights), the frontier of candidate ed
 
 == Algorithm explanation on simple sample graph
 
-image::{img}/sssp.png[]
+image::sssp.png[]
 
 .Create sample graph
 [source,cypher]

@@ -39,7 +39,7 @@ There is only weighted version of MST algorithm as if your graph is unweighted, 
 
 == Algorithm explanation on simple sample graph
 
-image::{img}/mst.png[]
+image::mst.png[]
 
 
 .Create sample graph
@@ -57,7 +57,7 @@ include::scripts/minimum-weight-spanning-tree.cypher[tag=write-sample-graph]
 ----
 
 .Results
-image::{img}/mst_result.png[]
+image::mst_result.png[]
 
 
 == Example Usage

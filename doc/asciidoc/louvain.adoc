@@ -83,7 +83,7 @@ Good https://arxiv.org/abs/0910.0165[research] showed that the different locally
 
 == Algorithm explanation on simple sample graph
 
-image::{img}/louvain.png[]
+image::louvain.png[]
 
 .Create sample graph
 [source,cypher]

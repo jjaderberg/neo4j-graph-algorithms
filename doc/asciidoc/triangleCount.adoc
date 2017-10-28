@@ -32,7 +32,7 @@ Therefore, counting triangles is a significant problem in graph mining, with sev
 
 == Algorithm explanation on simple sample graph
 
-image::{img}/triangle_count.png[]
+image::triangle_count.png[]
 
 
 .Create sample graph
