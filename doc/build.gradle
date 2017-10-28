@@ -217,30 +217,21 @@ html {
 }
 
 task copyHtmlResources(type: Copy) {
-    description 'Copy resources for the multi-page Neo4j Object-Graph Mapping (OGM) Manual'
-    inputs.dir "${projectDir}/css"
-    inputs.dir "${projectDir}/javascript"
-    inputs.dir "${projectDir}/images"
+    description 'Copy resources for the multi-page Neo4j Graph Algorithms Manual'
     inputs.dir "${resourcesDir}/css"
     inputs.dir "${resourcesDir}/javascript"
+    inputs.dir "${resourcesDir}/images"
     from ("${toDocbook.sourceDir}") {
         include 'images/**'
     }
     from ("${resourcesDir}") {
-        include 'images/**'
-        include 'javascript/**'
-        include 'css/**'
-    }
-    from ("${projectDir}/common") {
-        include 'logo/**'
-        include 'css/jquery.treeview.css'
         include 'css/chunked-base.css'
+        include 'css/extra.css'
         include 'javascript/colorize.js'
-        include 'javascript/tabs-for-chunked.js'
         include 'javascript/mp-nav.js'
-        include 'javascript/mutate.min.js'
-        include 'javascript/jquery/treeview/jquery.treeview.min.js'
         include 'javascript/versionswitcher.js'
+        include 'javascript/version.js'
+        include 'images/**'
     }
     into "${buildDir}/html/${graphAlgoDocVersion}"
 }
