@@ -173,8 +173,6 @@ html {
         '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/mode/groovy/groovy.min.js',
         'javascript/colorize.js',
         'javascript/tabs-for-chunked.js',
-        'javascript/mutate.min.js',
-        'javascript/jquery/treeview/jquery.treeview.min.js',
         'javascript/mp-nav.js',
         'javascript/versionswitcher.js',
         'javascript/version.js',
