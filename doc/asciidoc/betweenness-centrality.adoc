@@ -15,6 +15,8 @@ If Alice is removed, all connections in the graph would be cut off.
 This makes Alice important, because she ensures that no nodes are isolated.
 // end::introduction-end[]
 
+
+[[algorithms-betweenness-centrality-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -26,6 +28,8 @@ The algorithm was given its first formal definition by Linton Freeman, in his 19
 It was considered to be one of the "three distinct intuitive conceptions of centrality".
 // end::explanation[]
 
+
+[[algorithms-betweenness-centrality-usecase]]
 == Use-cases - when to use the Betweenness Centrality algorithm
 
 // tag::use-case[]
@@ -41,10 +45,10 @@ More detail can be found in http://archives.cerium.ca/IMG/pdf/Morselli_and_Roy_2
 
 * Betweenness centrality can be used to help microbloggers spread their reach on Twitter, with a recommendation engine that targets influencers that they should interact with in the future.
 This approach is described in ftp://ftp.umiacs.umd.edu/incoming/louiqa/PUB2012/RecMB.pdf["Making Recommendations in a Microblog to Improve the Impact of a Focal User"].
-
-
 // end::use-case[]
 
+
+[[algorithms-betweenness-centrality-limitations]]
 == Constraints - when not to use the Betweenness Centrality algorithm
 
 // tag::constraint[]
@@ -57,6 +61,8 @@ The fastest known algorithm for exactly computing betweenness of all the nodes r
 Instead, we can use an approximation algorithm that works with a subset of nodes.
 // end::constraint[]
 
+
+[[algorithms-betweenness-centrality-sample]]
 == Betweenness Centrality algorithm sample
 
 People with high betweenness tend to be the innovators and brokers in social networks.

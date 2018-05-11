@@ -8,6 +8,8 @@ The closeness centrality of a node measures its average farness (inverse distanc
 Nodes with a high closeness score have the shortest distances to all other nodes.
 // end::introduction[]
 
+
+[[algorithms-closeness-centrality-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -28,6 +30,8 @@ The formula for *normalized closeness centrality* is as follows:
 `normalized closeness centrality(node) = (number of nodes - 1) / sum(distance from node to all other nodes)`
 // end::formula[]
 
+
+[[algorithms-closeness-centrality-usecase]]
 == Use-cases - when to use the Closeness Centrality algorithm
 
 // tag::use-case[]
@@ -44,6 +48,8 @@ This process is described by Florian Boudin in https://www.aclweb.org/anthology/
 
 // end::use-case[]
 
+
+[[algorithms-closeness-centrality-limitations]]
 == Constraints - when not to use the Closeness Centrality algorithm
 
 // tag::constraint[]
@@ -54,6 +60,8 @@ This means that we'll end up with an infinite closeness centrality score when we
 In practice, a variation on the original formula is used so that we don't run into these issues.
 // end::constraint[]
 
+
+[[algorithms-closeness-centrality-sample]]
 == Closeness Centrality algorithm sample
 
 image::closeness_centrality.png[]
@@ -120,10 +128,11 @@ Calculation:
 k/S| 0.4  0.57  0.67  0.57   0.4     // normalized closeness centrality
 
 
-
-
+[[algorithms-closeness-centrality-example]]
 == Example usage
 
+
+[[algorithms-closeness-centrality-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

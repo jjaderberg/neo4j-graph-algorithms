@@ -9,6 +9,8 @@ One interesting feature of LPA is that nodes can be assigned preliminary labels 
 This means that it can be used as semi-supervised way of finding communities where we hand-pick some initial communities.
 // end::introduction[]
 
+
+[[algorithms-label-propagation-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -33,11 +35,11 @@ At the end of the propagation only a few labels will remain - most will have dis
 Nodes that have the same label at convergence are said to belong to the same community.
 // end::formula[]
 
+
+[[algorithms-label-propagation-usecase]]
 == Use-cases - when to use the Label Propagation algorithm
 
-
 // tag::use-case[]
-
 * Label propagation has been used to assign polarity of tweets, as a part of semantic analysis which uses seed labels from a classifier trained to detect positive and negative emoticons in combination with Twitter follower graph.
 For more information, see https://dl.acm.org/citation.cfm?id=2140465[Twitter polarity classification with label propagation over lexical links and the follower graph]
 * Label propagation has been used to estimate potentially dangerous combinations of drugs to co-prescribe to a patient, based on the chemical similarity and side effect profiles.
@@ -46,6 +48,8 @@ The study can be found in  https://www.nature.com/articles/srep12339[Label Propa
 For more information, see  https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.iwsds2017/papers/IWSDS2017_paper_12.pdf["Feature Inference Based on Label Propagation on Wikidata Graph for DST"]
 // end::use-case[]
 
+
+[[algorithms-label-propagation-limitations]]
 == Constraints - when not to use the Label Propagation algorithm
 
 // tag::constraint[]
@@ -54,6 +58,8 @@ The range of solutions can be narrowed if some nodes are given preliminary label
 Unlabelled nodes will be more likely to adapt the preliminary labels.
 // end::constraint[]
 
+
+[[algorithms-label-propagation-sample]]
 == Label Propagation algorithm sample
 
 image::label_propagation.png[]
@@ -117,6 +123,8 @@ include::scripts/label-propagation.cypher[tag=write-existing-label-sample-graph]
 
 // == Example usage
 
+
+[[algorithms-label-propagation-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

@@ -7,6 +7,8 @@ It differs from the Strongly Connected Components algorithm (SCC) because it onl
 As with SCC, `UnionFind` is often used early in an analysis to understand a graph's structure.
 // end::introduction[]
 
+
+[[algorithms-connected-components-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -14,6 +16,8 @@ The algorithm was first described by Bernard A. Galler and Michael J. Fischer in
 The components in a graph are computed using either the breadth-first search or depth-first search algorithms.
 // end::explanation[]
 
+
+[[algorithms-connected-components-usecase]]
 == Use-cases - when to use the Connected Components algorithm
 
 // tag::use-case[]
@@ -38,6 +42,8 @@ Read more in https://pdfs.semanticscholar.org/a8e0/5f803312032569688005acadaa4d4
 
 // end::constraint[]
 
+
+[[algorithms-connected-components-sample]]
 == Connected Components algorithm sample
 
 If we recall that an undirected graph is connected if, for every pair of vertices there is a path in the graph between those vertices.
@@ -127,6 +133,8 @@ include::scripts/connected-components.cypher[tag=weighted-write-sample-graph]
 In this case we can see that, because the weight of the relationship between Bridget and Alice is only 0.5, the relationship is ignored by the algorithm, and Bridget ends up in her own component.
 // end::weighted-stream-sample-graph-explanation[]
 
+
+[[algorithms-connected-components-example]]
 == Example usage
 
 As mentioned above, connected components are an essential step in preprocessing your data.
@@ -155,6 +163,8 @@ It is quite high, but not shocking, as we have a friendship social network where
 We can now move on to next step of analysis and run centralities on only the biggest components, so that our results will be more accurate.
 We will write back the results to the node, and use centralities with Cypher loading, or set a new label for the biggest component.
 
+
+[[algorithms-connected-components-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

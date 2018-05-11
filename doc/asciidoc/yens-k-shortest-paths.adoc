@@ -7,6 +7,8 @@ Yen's K-shortest paths algorithm computes single-source K-shortest loopless path
 
 // end::introduction[]
 
+
+[[algorithms-yens-k-shortest-path-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -16,6 +18,8 @@ Our implementation uses Dijkstra algorithm to find the shortest path and then pr
 
 // end::explanation[]
 
+
+[[algorithms-yens-k-shortest-path-usecase]]
 == Use-cases - when to use the Yen's K-shortest paths algorithm
 
 // tag::use-case[]
@@ -25,9 +29,10 @@ Our implementation uses Dijkstra algorithm to find the shortest path and then pr
 * K-shortest paths algorithm is used to study alternative routing on road networks and to recommend top k-paths to the user. Find this study in https://www.informatik.hu-berlin.de/de/forschung/gebiete/wbi/research/publications/2015/sigspatial_kshortest.pdf[Alternative Routing: k-Shortest Paths with Limited Overlap]
 
 * K-shortest paths algorithm has been used as part of https://pdfs.semanticscholar.org/51e7/8aa2041d595b3871a49f4b92be725199e73d.pdf[Finding Diverse High-Quality Plans for Hypothesis Generation] process.
-
 // end::use-case[]
 
+
+[[algorithms-yens-k-shortest-path-limitations]]
 == Constraints - when not to use the Yen's K-shortest paths algorithm
 
 // tag::constraint[]
@@ -35,6 +40,8 @@ Yen's K-Shortest paths algorithm does not support negative weights.
 The algorithm assumes that adding a relationship to a path can never make a path shorter - an invariant that would be violated with negative weights.
 // end::constraint[]
 
+
+[[algorithms-yens-k-shortest-path-sample]]
 == Yen's K-shortest paths algorithm sample
 
 image::yens.png[]
@@ -64,17 +71,12 @@ image::yens_result.png[]
 // end::write-sample-graph-result[]
 
 // tag::write-sample-graph-explanation[]
-
 The quickest route takes us from A to B, via D and E and is saved as `PATH_0`.
 Second quickest path is saved as `PATH_1` and third one is saved as`PATH_2`
-
 // end::write-sample-graph-explanation[]
 
 
-
-// == Example usage
-
-
+[[algorithms-yens-k-shortest-path-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

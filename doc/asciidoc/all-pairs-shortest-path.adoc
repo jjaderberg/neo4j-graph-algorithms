@@ -7,6 +7,8 @@ This algorithm has optimisations that make it quicker than calling the Single So
 
 // end::introduction[]
 
+
+[[algorithm-all-pairs-shortest-path-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -16,6 +18,8 @@ In this scenario, the algorithm will return `Infinity` value as a result between
 
 Plain cypher does not support filtering `Infinity` values, so `algo.isFinite` function was added to help filter `Infinity` values from results.
 
+
+[[algorithm-all-pairs-shortest-path-usecase]]
 == Use-cases - when to use the All Pairs Shortest Path algorithm
 
 // tag::use-case[]
@@ -36,6 +40,7 @@ There are more details about this approach in https://cs.uwaterloo.ca/research/t
 // end::constraint[]
 
 
+[[algorithm-all-pairs-shortest-path-sample]]
 == All Pairs Shortest Path algorithm sample
 
 image::sssp.png[]

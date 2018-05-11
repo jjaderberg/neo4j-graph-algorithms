@@ -10,6 +10,8 @@ The Louvain algorithm is one of the fastest modularity-based algorithms, and wor
 It also reveals a hierarchy of communities at different scales, which can be useful for understanding the global functioning of a network.
 // end::introduction[]
 
+
+[[algorithms-louvain-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -46,6 +48,7 @@ At that point, repeated application of stages 1 and 2 will not yield any more mo
 // end::formula[]
 
 
+[[algorithms-louvain-usecase]]
 == Use-cases - when to use the Louvain algorithm
 
 // tag::use-case[]
@@ -61,6 +64,8 @@ The study mentioned is https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2784301/["Hi
 
 // end::use-case[]
 
+
+[[algorithms-louvain-limitations]]
 == Constraints - when not to use the Louvain algorithm
 
 // tag::constraint[]
@@ -81,6 +86,8 @@ Research undertaken at Universite Catholique de Louvain showed that the differen
 For more information, see https://arxiv.org/abs/0910.0165["The performance of modularity maximization in practical contexts"]
 // end::constraint[]
 
+
+[[algorithms-louvain-sample]]
 == Louvain algorithm sample
 
 image::louvain.png[]
@@ -127,8 +134,7 @@ Charles is the only one who has friends in both communities, but he has more in 
 // == Example usage
 
 
-
-
+[[algorithms-louvain-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

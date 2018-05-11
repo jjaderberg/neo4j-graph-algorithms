@@ -7,6 +7,8 @@ In this category, Dijkstra's algorithm is the most well known.
 It is a real time graph algorithm, and can be used as part of the normal user flow in a web or mobile application.
 // end::introduction[]
 
+
+[[algorithms-shortest-path-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -18,6 +20,8 @@ He needed to find a problem and solution that people not familiar with computing
 He later implemented it for a slightly simplified transportation map of 64 cities in the Netherlands.
 // end::explanation[]
 
+
+[[algorithms-shortest-path-usecase]]
 == Use-cases - when to use the Shortest Path algorithm
 
 // tag::use-case[]
@@ -29,6 +33,8 @@ For example, when you view someone's profile on LinkedIn, it will indicate how m
 
 // end::use-case[]
 
+
+[[algorithms-shortest-path-limitations]]
 == Constraints - when not to use the Shortest Path algorithm
 
 // tag::constraint[]
@@ -36,6 +42,8 @@ Dijkstra does not support negative weights.
 The algorithm assumes that adding a relationship to a path can never make a path shorter - an invariant that would be violated with negative weights.
 // end::constraint[]
 
+
+[[algorithms-shortest-path-sample]]
 == Shortest Path algorithm sample
 
 image::sssp.png[]
@@ -46,8 +54,8 @@ image::sssp.png[]
 include::scripts/single-shortest-path.cypher[tag=create-sample-graph]
 ----
 
-=== The Dijkstra Shortest Path algorithm
 
+=== The Dijkstra Shortest Path algorithm
 
 .The following will run the algorithm and stream results:
 [source,cypher]
@@ -88,6 +96,7 @@ The quickest route takes us from A to F, via C, D, and E, at a total cost of 160
 // == Example usage
 
 
+[[algorithms-shortest-path-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

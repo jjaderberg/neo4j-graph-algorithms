@@ -8,6 +8,8 @@ It is based upon the observation that some searches are informed, and that by be
 
 // end::introduction[]
 
+
+[[algorithms-a_star-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -29,6 +31,8 @@ In our implementation, geospatial distance is used as heurestic.
 
 // end::explanation[]
 
+
+[[algorithms-a_star-usecase]]
 == Use-cases - when to use the A* algorithm
 
 // tag::use-case[]
@@ -43,6 +47,8 @@ In our implementation, geospatial distance is used as heurestic.
 
 // end::constraint[]
 
+
+[[algorithms-a_star-sample]]
 == A* algorithm sample
 
 .The following will create a sample graph:
@@ -69,6 +75,8 @@ include::scripts/astar.cypher[tag=stream-sample-graph]
 |===
 // end::stream-sample-graph-result[]
 
+
+[[algorithms-a_star-syntax]]
 == Syntax
 
 .The following will run the algorithm and stream results:

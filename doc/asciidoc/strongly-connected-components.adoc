@@ -6,6 +6,8 @@ The Strongly Connected Components (SCC) algorithm finds sets of connected nodes 
 It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
 // end::introduction[]
 
+
+[[algorithms-strongly-connected-components-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -13,6 +15,8 @@ SCC is one of the earliest graph algorithms, and the first linear-time algorithm
 Decomposing a directed graph into its strongly connected components is a classic application of the depth-first search algorithm.
 // end::explanation[]
 
+
+[[algorithms-strongly-connected-components-usecase]]
 == Use-cases - when to use the Strongly Connected Components algorithm
 
 // tag::use-case[]
@@ -38,6 +42,8 @@ The SCC algorithms can be used to find such groups, and suggest the commonly lik
 
 // end::constraint[]
 
+
+[[algorithms-strongly-connected-components-sample]]
 == Strongly Connected Components algorithm sample
 
 image::strongly_connected_components.png[]
@@ -88,6 +94,8 @@ include::scripts/strongly-connected-components.cypher[tag=get-largest-component]
 
 // == Example usage
 
+
+[[algorithms-strongly-connected-components-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

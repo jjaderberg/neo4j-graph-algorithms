@@ -7,6 +7,8 @@ PageRank is an algorithm that measures the *transitive* influence or connectivit
 It can be computed by either iteratively distributing one node's rank (originally based on degree) over its neighbours or by randomly traversing the graph and counting the frequency of hitting each nodes during these walks.
 // end::introduction[]
 
+
+[[algorithms-pagerank-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -30,6 +32,8 @@ It is usually set to 0.85.
 * `C(A)` is defined as the number of links going out of page `A`.
 // end::formula[]
 
+
+[[algorithms-pagerank-usecase]]
 == Use-cases - when to use the PageRank algorithm
 
 // tag::use-case[]
@@ -50,6 +54,8 @@ It can help find doctors or providers that are behaving in an unusual manner, an
 There are many more use cases, which you can read about in David Gleich's https://arxiv.org/pdf/1407.5107.pdf["PageRank beyond the web"^]
 // end::use-case[]
 
+
+[[algorithms-pagerank-limitations]]
 == Constraints - when not to use the PageRank algorithm
 
 // tag::constraint[]
@@ -66,6 +72,8 @@ If you see unexpected results from running the algorithm, it is worth doing some
 You can read http://www.cs.princeton.edu/~chazelle/courses/BIB/pagerank.htm[The Google PageRank Algorithm and How It Works^] to learn more.
 // end::constraint[]
 
+
+[[algorithms-pagerank-sample]]
 == PageRank algorithm sample
 
 This sample will explain the PageRank algorithm, using a simple graph:
@@ -115,6 +123,7 @@ We can also see that it's not only the number of incoming links that is importan
 // end::stream-sample-graph-explanation[]
 
 
+[[algorithms-pagerank-example]]
 == Example usage
 
 In this example we will run PageRank on Yelp's social network to find potential influencers.
@@ -133,6 +142,8 @@ We can also apply this approach to other algorithms that use *Cypher loading*.
 include::scripts/pagerank.cypher[tag=pagerank-stream-yelp-social]
 ----
 
+
+[[algorithms-pagerank-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

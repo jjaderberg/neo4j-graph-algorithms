@@ -6,6 +6,8 @@ Triangle counting is a community detection graph algorithm that is used to deter
 A triangle is a set of three nodes, where each node has a relationship to all other nodes.
 // end::introduction[]
 
+
+[[algorithms-triangle-count-clustering-coefficient-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -26,6 +28,8 @@ The transitivity coefficient of a graph is sometimes used, which is three times 
 For more information, see http://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf["Finding, Counting and Listing all Triangles in Large Graphs, An Experimental Study"].
 // end::explanation[]
 
+
+[[algorithms-triangle-count-clustering-coefficient-usecase]]
 == Use-cases - when to use the Triangle Counting / Clustering Coefficient algorithm
 
 // tag::use-case[]
@@ -46,6 +50,8 @@ For more information, see http://www.pnas.org/content/99/9/5825[Curvature of co-
 
 // end::constraint[]
 
+
+[[algorithms-triangle-count-clustering-coefficient-sample]]
 == Triangle Counting / Clustering Coefficient algorithm sample
 
 image::triangle_count.png[]
@@ -109,6 +115,8 @@ include::scripts/triangle-count.cypher[tag=triangle-stream-sample-graph]
 We learn that Michael is part of the most triangles, but it's Karin and Mark who are the best at introducing their friends - all of the people who know them, know each other!
 // end::triangle-stream-sample-graph-explanation[]
 
+
+[[algorithms-triangle-count-clustering-coefficient-example]]
 == Example usage
 
 In graph theory, a https://en.wikipedia.org/wiki/Clustering_coefficient[clustering coefficient] is a measure of the degree to which nodes in a graph tend to cluster together.
@@ -128,6 +136,7 @@ We can assume that users are not on Yelp for finding and creating friends, like 
 Local triangle count and clustering coefficient of nodes can be used as features in finding influencers in social networks.
 
 
+[[algorithms-triangle-count-clustering-coefficient-syntax]]
 == Syntax
 
 .The following will return a stream of triples with `nodeId` for each triangle:

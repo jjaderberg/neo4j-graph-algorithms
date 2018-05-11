@@ -5,6 +5,8 @@
 The Single Source Shortest Path (SSSP) algorithm calculates the shortest (weighted) path from a node to all other nodes in the graph.
 // end::introduction[]
 
+
+[[algorithms-single-source-shortest-path-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -13,14 +15,17 @@ SSSP came into prominence at the same time as the shortest path algorithm and Di
 We implement a delta-stepping algorithm that has been https://arxiv.org/pdf/1604.02113v1.pdf[shown to outperform Dijkstra's^].
 // end::explanation[]
 
+
+[[algorithms-single-source-shortest-path-usecase]]
 == Use-cases - when to use the Single Source Shortest Path algorithm
 
 // tag::use-case[]
 * https://en.wikipedia.org/wiki/Open_Shortest_Path_First[Open Shortest Path First^] is a routing protocol for IP networks.
 It uses Dijkstra's algorithm to help detect changes in topology, such as link failures, and https://routing-bits.com/2009/08/06/ospf-convergence/[come up with a new routing structure in seconds^].
-
 // end::use-case[]
 
+
+[[algorithms-single-source-shortest-path-limitations]]
 == Constraints - when not to use the Single Source Shortest Path algorithm
 
 // tag::constraint[]
@@ -28,6 +33,8 @@ Delta stepping does not support negative weights.
 The algorithm assumes that adding a relationship to a path can never make a path shorter - an invariant that would be violated with negative weights.
 // end::constraint[]
 
+
+[[algorithms-single-source-shortest-path-sample]]
 == Single Source Shortest Path algorithm sample
 
 image::sssp.png[]
@@ -76,6 +83,7 @@ The above table shows the cost of going from A to each of the other nodes, inclu
 // == Example usage
 
 
+[[algorithms-single-source-shortest-path-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:
