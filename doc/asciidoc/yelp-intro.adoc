@@ -41,6 +41,8 @@ While _review.json_ is even bigger in size, it is mostly made up of the text tha
 We also do not need the actual text, but only the meta-data about them.
 For example, meta-data on who wrote the review and how a certain business was rated is imported, but the text itself will not be imported.
 
+
+[[yelp-model]]
 == Graph model
 
 image::yelp_graph_model.png[]
@@ -57,8 +59,9 @@ If we were to use our graph as a recommendation engine, we might construct a dif
 
 For further information on using Neo4j as a recommendation engine, check out this http://guides.neo4j.com/sandbox/recommendations[great guide] or this https://www.youtube.com/watch?v=oMTmG4ClO5I[educational video].
 
-== Import
 
+[[yelp-import]]
+== Import
 
 .Define graph schema (constraint/index)
 [source,cypher]
@@ -90,6 +93,8 @@ include::scripts/yelp-import.cypher[tag=load-review]
 include::scripts/yelp-import.cypher[tag=load-user]
 ----
 
+
+[[yelp-networks]]
 == Networks
 
 === Social network

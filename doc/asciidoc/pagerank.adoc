@@ -1,3 +1,4 @@
+[[algorithms-pagerank]]
 = The PageRank algorithm
 
 // tag::introduction[]

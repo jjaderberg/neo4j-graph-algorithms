@@ -1,3 +1,4 @@
+[[algorithms-yens-k-shortest-path]]
 = The Yen's K-shortest paths algorithm
 
 // tag::introduction[]

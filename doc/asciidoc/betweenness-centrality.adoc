@@ -1,3 +1,4 @@
+[[algorithms-betweenness-centrality]]
 = The Betweenness Centrality algorithm
 
 // tag::introduction-start[]

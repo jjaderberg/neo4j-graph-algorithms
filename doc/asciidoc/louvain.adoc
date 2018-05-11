@@ -1,3 +1,4 @@
+[[algorithms-louvain]]
 = The Louvain algorithm
 
 

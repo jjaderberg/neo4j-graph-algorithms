@@ -1,3 +1,4 @@
+[[algorithms-label-propagation]]
 = The Label Propagation algorithm
 
 // tag::introduction[]

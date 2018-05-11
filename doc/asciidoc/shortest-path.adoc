@@ -1,3 +1,4 @@
+[[algorithms-shortest-path]]
 = The Shortest Path algorithm
 
 // tag::introduction[]

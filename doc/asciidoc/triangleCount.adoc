@@ -1,3 +1,4 @@
+[[algorithms-triangle-count-clustering-coefficient]]
 = The Triangle Counting / Clustering Coefficient algorithm
 
 // tag::introduction[]

@@ -1,3 +1,4 @@
+[[algorithms-connected-components]]
 = The Connected Components algorithm
 
 // tag::introduction[]
