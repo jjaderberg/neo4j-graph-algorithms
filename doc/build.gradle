@@ -1,3 +1,6 @@
+import org.neo4j.doc.build.xslt.XsltTask
+import org.neo4j.doc.build.docbook.DocBookPlugin
+
 buildscript {
     ext {
         asciidoctorjVersion = '1.5.6'
@@ -104,6 +107,34 @@ task docbook {
             into outputDir
         }
     }
+}
+
+task makeToc(type: XsltTask, dependsOn: docbook) {
+    description 'Create a table of contents aka complete content map.'
+    ext.sourceDir = docbook.outputDir
+    ext.sourceFile = "$sourceDir/index.xml"
+    ext.outputFile = "$buildDir/docbook/${versions.graphAlgoDocs}/toc.xml"
+    def outputDir = "$buildDir/docbook/${versions.graphAlgoDocs}/_trash"
+
+    def url = DocBookPlugin.getClassLoader().getResource("xsl/create-toc/xhtml/maketoc.xsl")
+    stylesheet url
+    input sourceFile
+    outFile outputFile
+
+    sourceSaxParser "org.apache.xml.resolver.tools.ResolvingXMLReader"
+    stylesheetSaxParser "org.apache.xml.resolver.tools.ResolvingXMLReader"
+    uriResolver "org.apache.xml.resolver.tools.CatalogResolver"
+
+    usingUrls true
+    usingClasspathUrls true
+    if (hasProperty('traceDocbook')) { verbose true }
+
+    parameters([
+        "base.dir": "${outputDir}",
+        "chunk.section.depth": "8",
+        "chunk.first.sections": "1",
+        "use.id.as.dirname": "1",
+    ])
 }
 
 html {
