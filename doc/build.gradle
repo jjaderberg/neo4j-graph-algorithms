@@ -23,7 +23,7 @@ buildscript {
 plugins {
     id 'base'
     id 'org.neo4j.doc.build.saxon' version '1.0-alpha01'
-    id 'org.neo4j.doc.build.docbook' version '1.0-alpha01'
+    id 'org.neo4j.doc.build.docbook' version '1.0-alpha03'
 }
 
 if (!project.hasProperty('graphAlgoVersion')) { ext.graphAlgoVersion = '3.2.9.0' }
@@ -112,6 +112,9 @@ html {
     ext.sourceFile = "$sourceDir/index.xml"
     ext.outputDir = "$buildDir/html/${versions.graphAlgoDocs}"
     inputs.file sourceFile
+    inputs.dir 'css'
+    inputs.dir 'images'
+    inputs.dir 'javascript'
     outputs.dir outputDir
 
     def libraryLinks = [
@@ -132,6 +135,7 @@ html {
         'javascript/mp-nav.js',
         'javascript/versionswitcher.js',
         'javascript/version.js',
+        '//s3-eu-west-1.amazonaws.com/alpha.neohq.net/docs/new-manual/assets/search.js',
     ].join(" ")
     def styles = [
         '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
@@ -158,7 +162,7 @@ html {
         "neo.documentation.library.links": libraryLinks,
         "generate.toc": "''",
         "header.rule": "0",
-        "neo.search": "1",
+        "neo.newsearch": "1",
         "html.script": scripts,
         "html.stylesheet": styles
     ])
