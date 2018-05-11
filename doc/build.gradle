@@ -142,6 +142,8 @@ html {
     ext.sourceDir = docbook.outputDir
     ext.sourceFile = "$sourceDir/index.xml"
     ext.outputDir = "$buildDir/html/${versions.graphAlgoDocs}"
+    ext.docId = 'graph-algorithms'
+    ext.contentMap = "$projectDir/docbook/content-map.xml"
     inputs.file sourceFile
     inputs.dir 'css'
     inputs.dir 'images'
@@ -178,13 +180,12 @@ html {
         'css/extra.css'
     ].join(" ")
 
-    stylesheet "classpath:xsl/custom/xhtml5/chunk.xsl"
+    stylesheet "classpath:xsl/chunk-from-toc/xhtml/chunktoc.xsl"
     input sourceFile
 
     // Stylesheet parameters
     parameters ([
         "base.dir": "${outputDir}",
-        "chunk.section.depth": "0",
         "html.ext": ".html",
         "make.clean.html": "1",
         "chunker.output.method": "html",
@@ -195,7 +196,9 @@ html {
         "header.rule": "0",
         "neo.newsearch": "1",
         "html.script": scripts,
-        "html.stylesheet": styles
+        "html.stylesheet": styles,
+        "chunk.toc": "${contentMap}",
+        "current.docid": "$docId",
     ])
     doLast {
         copy {
